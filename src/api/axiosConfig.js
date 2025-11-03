@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  baseURL: "http://127.0.0.1:8000/api",
+  baseURL: "http://184.73.8.191:8000/api",
 });
 
 // Request interceptor: attach access token
