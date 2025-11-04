@@ -104,40 +104,31 @@
 // );
 
 // export default axiosInstance;
-
 import axios from "axios";
 
 const backendURL = "http://184.73.8.191:8000/api";
 
-// Function to build encoded full URL for AllOrigins
-const getEncodedURL = (endpoint) => {
-  const fullUrl = `${backendURL}${endpoint}`;
-  return `https://api.allorigins.win/raw?url=${encodeURIComponent(fullUrl)}`;
-};
+const axiosInstance = axios.create({
+  // ✅ Use AllOrigins without encoding the inner slashes
+  baseURL: `https://api.allorigins.win/raw?url=${backendURL}`,
+});
 
-// Create axios instance (no baseURL)
-const axiosInstance = axios.create();
-
-// ✅ Request Interceptor
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("accessToken");
-
-    // Replace config.url with full encoded AllOrigins URL
-    if (!config.url.startsWith("http")) {
-      config.url = getEncodedURL(config.url);
-    }
-
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-
+    // ✅ Append endpoint directly (no extra encoding)
+    if (config.url && !config.url.startsWith("http")) {
+      config.url = `${config.baseURL}${config.url}`;
+      config.baseURL = ""; // prevent double baseURL joining
+    }
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// ✅ Response Interceptor (for token refresh)
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
